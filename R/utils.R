@@ -47,7 +47,7 @@ make_canvas_url <- function(...) {
   return(url)
 }
 
-#' @importFrom httr GET POST PUT
+#' @importFrom httr GET POST PUT HEAD
 canvas_query <- function(urlx, args = NULL, type = "GET") {
 
   args <- sc(args)
