@@ -6,7 +6,7 @@
 \alias{get_submission_single}
 \title{Submission functions}
 \usage{
-get_submissions(course_id, type, type_id)
+get_submissions(course_id, type, type_id, options = NULL)
 
 get_submission_single(course_id, type, type_id, user_id)
 }
@@ -16,6 +16,8 @@ get_submission_single(course_id, type, type_id, user_id)
 \item{type}{Either "quizzes" or "assignments"}
 
 \item{type_id}{A valid quiz or assignment id}
+
+\item{options}{Options to append to the URL, eg, `include[]=rubric_assessment`; see <https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.index>}
 
 \item{user_id}{id of user whose submission should be retrieved}
 }

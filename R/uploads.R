@@ -161,3 +161,84 @@ create_course_assignment <- function(course_id, name, position = NULL, submissio
   invisible(canvas_query(url, args, "POST"))
   message(sprintf("Assignment %s created.", name))
 }
+
+#' Create a course quiz
+#'
+#' @param course_id a valid course id
+#' @param title The quiz title (required)
+#' @param description a description of the quiz
+#' @param quiz_type type of quiz. Options: practice_quiz, assignment, graded_survey, survey
+#' @param assignment_group_id The assignment group id to put the assignment in. Defaults to the top assignment group in the course. Only valid if the quiz is graded, i.e. if quiz_type is “assignment” or “graded_survey”.
+#' @param time_limit Time limit to take this quiz, in minutes. Set to null for no time limit. Defaults to null.
+#' @param shuffle_answers If true, quiz answers for multiple choice questions will be randomized for each student. Defaults to false.
+#' @param hide_results Dictates whether or not quiz results are hidden from students. If null, students can see their results after any attempt. If “always”, students can never see their results. If “until_after_last_attempt”, students can only see results after their last attempt. (Only valid if allowed_attempts > 1). Defaults to null. Options: always, until_after_last_attempt
+#' @param show_correct_answers Only valid if hide_results=null If false, hides correct answers from students when quiz results are viewed. Defaults to true.
+#' @param show_correct_answers_last_attempt Only valid if show_correct_answers=true and allowed_attempts > 1 If true, hides correct answers from students when quiz results are viewed until they submit the last attempt for the quiz. Defaults to false.
+#' @param show_correct_answers_at Only valid if show_correct_answers=true If set, the correct answers will be visible by students only after this date, otherwise the correct answers are visible once the student hands in their quiz submission.
+#' @param hide_correct_answers_at Only valid if show_correct_answers=true If set, the correct answers will stop being visible once this date has passed. Otherwise, the correct answers will be visible indefinitely.
+#' @param allowed_attempts Number of times a student is allowed to take a quiz. Set to -1 for unlimited attempts. Defaults to 1.
+#' @param scoring_policy Required and only valid if allowed_attempts > 1. Scoring policy for a quiz that students can take multiple times. Defaults to “keep_highest”. Options: keep_highest, keep_latest
+#' @param one_question_at_a_time If true, shows quiz to student one question at a time. Defaults to false.
+#' @param cant_go_back Only valid if one_question_at_a_time=true If true, questions are locked after answering. Defaults to false.
+#' @param access_code Restricts access to the quiz with a password. For no access code restriction, set to null. Defaults to null.
+#' @param ip_filter Restricts access to the quiz to computers in a specified IP range. Filters can be a comma-separated list of addresses, or an address followed by a mask.  Examples: "192.168.217.1"; "192.168.217.1/24"; "192.168.217.1/255.255.255.0". For no IP filter restrictions, set to null. Defaults to null.
+#' @param due_at The day/time the quiz is due. Accepts times in ISO 8601 format, e.g. 2011-10-21T18:48Z.
+#' @param lock_at The day/time the quiz is locked for students. Accepts times in ISO 8601 format, e.g. 2011-10-21T18:48Z.
+#' @param unlock_at The day/time the quiz is unlocked for students. Accepts times in ISO 8601 format, e.g. 2011-10-21T18:48Z.
+#' @param published Whether the quiz should have a draft state of published or unpublished. NOTE: If students have started taking the quiz, or there are any submissions for the quiz, you may not unpublish a quiz and will recieve an error.
+#' @param one_time_results Whether students should be prevented from viewing their quiz results past the first time (right after they turn the quiz in.) Only valid if “hide_results” is not set to “always”. Defaults to false.
+#' @param only_visible_to_overrides Whether this quiz is only visible to overrides (Only useful if 'differentiated assignments' account setting is on) Defaults to false.
+#'
+#' @return
+#' @export
+create_course_quiz <- function(course_id, title,
+                               description = NULL,
+                               quiz_type = NULL,
+                               assignment_group_id = NULL,
+                               time_limit = NULL,
+                               shuffle_answers = NULL,
+                               hide_results = NULL,
+                               show_correct_answers = NULL,
+                               show_correct_answers_last_attempt = NULL,
+                               show_correct_answers_at = NULL,
+                               hide_correct_answers_at = NULL,
+                               allowed_attempts = NULL,
+                               scoring_policy = NULL,
+                               one_question_at_a_time = NULL,
+                               cant_go_back = NULL,
+                               access_code = NULL,
+                               ip_filter = NULL,
+                               due_at = NULL,
+                               lock_at = NULL,
+                               unlock_at = NULL,
+                               published = NULL,
+                               one_time_results = NULL,
+                               only_visible_to_overrides = NULL) {
+  url <- make_canvas_url("courses", course_id, "quizzes")
+  args <- sc(list(title = title,
+                  description = description,
+                  quiz_type = quiz_type,
+                  assignment_group_id = assignment_group_id,
+                  time_limit = time_limit,
+                  shuffle_answers = shuffle_answers,
+                  hide_results = hide_results,
+                  show_correct_answers = show_correct_answers,
+                  show_correct_answers_last_attempt = show_correct_answers_last_attempt,
+                  show_correct_answers_at = show_correct_answers_at,
+                  hide_correct_answers_at = hide_correct_answers_at,
+                  allowed_attempts = allowed_attempts,
+                  scoring_policy = scoring_policy,
+                  one_question_at_a_time = one_question_at_a_time,
+                  cant_go_back = cant_go_back,
+                  access_code = access_code,
+                  ip_filter = ip_filter,
+                  due_at = due_at,
+                  lock_at = lock_at,
+                  unlock_at = unlock_at,
+                  published = published,
+                  one_time_results = one_time_results,
+                  only_visible_to_overrides = only_visible_to_overrides))
+  names(args) <- sprintf("quiz[%s]", names(args))
+  invisible(canvas_query(url, args, "POST"))
+  message(sprintf("Quiz %s created.", title))
+}
