@@ -244,12 +244,26 @@ create_course_quiz <- function(course_id, title,
   quiz = response %>%
     httr::content(as = 'text') %>%
     jsonlite::fromJSON()
-  return(quiz)
+  return(invisible(quiz))
 }
 
 #' Add a question to an existing quiz
 #'
-#' TODO: docs
+#' @param course_id Course ID
+#' @param quiz_id Quiz ID
+#' @param question_name The name of the question.
+#' @param question_text The text of the question.
+#' @param quiz_group_id The id of the quiz group to assign the question to.
+#' @param question_type The type of question. Multiple optional fields depend upon the type of question to be used. Options: calculated_question, essay_question, file_upload_question, fill_in_multiple_blanks_question, matching_question, multiple_answers_question, multiple_choice_question, multiple_dropdowns_question, numerical_question, short_answer_question, text_only_question, true_false_question
+#' @param position The order in which the question will be displayed in the quiz in relation to other questions.
+#' @param points_possible The maximum amount of points received for answering this question correctly.
+#' @param correct_comments The comment to display if the student answers the question correctly.
+#' @param incorrect_comments The comment to display if the student answers incorrectly.
+#' @param neutral_comments The comment to display regardless of how the student answered.
+#' @param text_after_answers no description
+#' @param answers no description (Answer object)
+#' @export
+#' @return Dataframe representation of the question
 create_quiz_question = function (course_id, quiz_id,
                                  question_name  = NULL,
                                  question_text = NULL,
@@ -283,5 +297,5 @@ create_quiz_question = function (course_id, quiz_id,
   question = response %>%
     httr::content(as = 'text') %>%
     jsonlite::fromJSON()
-  return(question)
+  return(invisible(question))
 }
