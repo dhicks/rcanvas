@@ -2,6 +2,7 @@
 #' @param course_id A valid canvas course id
 #' @param type Either "quizzes" or "assignments"
 #' @param type_id A valid quiz or assignment id
+#' @param options Options to append to the URL, eg, `include[]=rubric_assessment`; see <https://canvas.instructure.com/doc/api/submissions.html#method.submissions_api.index>
 #' @name submissions
 NULL
 
@@ -16,11 +17,15 @@ NULL
 #' @examples
 #' \dontrun{get_submissions(27, "quizzes", 2915)}
 #' \dontrun{get_submissions(27, "assignments", 254)}
-get_submissions <- function(course_id, type, type_id) {
+get_submissions <- function(course_id, type, type_id,
+                            options = NULL) {
   if (!type %in% c("quizzes", "assignments"))
     stop("type must be 'quizzes' or 'assignments'")
   url <- make_canvas_url('courses', course_id, type, type_id,
                          'submissions')
+  if (!is.null(options)) {
+    url = paste0(url, '?', options)
+  }
   args <- list(access_token = check_token(),
                per_page = 100)
   process_response(url, args) %>%
