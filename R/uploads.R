@@ -127,8 +127,7 @@ create_course_assignment <- function(course_id, name, position = NULL, submissio
                                     lock_at = NULL, unlock_at = NULL, description = NULL, assignment_group_id = NULL, muted = NULL,
                                     assignment_overrides = NULL, only_visible_to_overrides = NULL, published = NULL, grading_standard_id = NULL,
                                     omit_from_final_grade = NULL, quiz_lti = NULL) {
-  url <- paste0(canvas_url(),
-                paste("courses", course_id, "assignments", sep = "/"))
+  url <- make_canvas_url("courses", course_id, "assignments")
   args <- sc(list(name = name,
                   position = position,
                   submission_types = submission_types,
