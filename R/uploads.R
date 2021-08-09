@@ -189,7 +189,7 @@ create_course_assignment <- function(course_id, name, position = NULL, submissio
 #' @param one_time_results Whether students should be prevented from viewing their quiz results past the first time (right after they turn the quiz in.) Only valid if “hide_results” is not set to “always”. Defaults to false.
 #' @param only_visible_to_overrides Whether this quiz is only visible to overrides (Only useful if 'differentiated assignments' account setting is on) Defaults to false.
 #'
-#' @return
+#' @return Representation of the quiz object as a list
 #' @export
 create_course_quiz <- function(course_id, title,
                                description = NULL,
@@ -239,6 +239,49 @@ create_course_quiz <- function(course_id, title,
                   one_time_results = one_time_results,
                   only_visible_to_overrides = only_visible_to_overrides))
   names(args) <- sprintf("quiz[%s]", names(args))
-  invisible(canvas_query(url, args, "POST"))
+  response = canvas_query(url, args, "POST")
   message(sprintf("Quiz %s created.", title))
+  quiz = response %>%
+    httr::content(as = 'text') %>%
+    jsonlite::fromJSON()
+  return(quiz)
+}
+
+#' Add a question to an existing quiz
+#'
+#' TODO: docs
+create_quiz_question = function (course_id, quiz_id,
+                                 question_name  = NULL,
+                                 question_text = NULL,
+                                 quiz_group_id  = NULL,
+                                 question_type = NULL,
+                                 position = NULL,
+                                 points_possible = NULL,
+                                 correct_comments = NULL,
+                                 incorrect_comments = NULL,
+                                 neutral_comments = NULL,
+                                 text_after_answers = NULL,
+                                 answers = NULL) {
+  url = make_canvas_url('courses', course_id,
+                        'quizzes', quiz_id,
+                        'questions')
+  args = sc(list(question_name = question_name,
+                 question_text = question_text,
+                 quiz_group_id  = quiz_group_id,
+                 question_type = question_type,
+                 position = position,
+                 points_possible = points_possible,
+                 correct_comments = correct_comments,
+                 incorrect_comments = incorrect_comments,
+                 neutral_comments = neutral_comments,
+                 text_after_answers = text_after_answers,
+                 answers = answers))
+  names(args) <- sprintf("question[%s]", names(args))
+
+  response = canvas_query(url, args, "POST")
+  message(sprintf("Question %s created.", question_name))
+  question = response %>%
+    httr::content(as = 'text') %>%
+    jsonlite::fromJSON()
+  return(question)
 }
