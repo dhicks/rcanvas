@@ -21,43 +21,79 @@
 #'
 #' @examples
 #' upload_course_file(course_id = 13212, file_name = "activity.pdf")
-upload_course_file <- function(course_id, file_name, parent_folder_id = NULL, parent_folder_path = "/", on_duplicate = "overwrite") {
-
-  url <- make_canvas_url("courses", course_id, "files")
-  upload_file(url, file_name, parent_folder_id, parent_folder_path, on_duplicate)
-
+upload_course_file <- function(
+      course_id,
+      file_name,
+      parent_folder_id = NULL,
+      parent_folder_path = "/",
+      on_duplicate = "overwrite"
+) {
+      url <- make_canvas_url("courses", course_id, "files")
+      upload_file(
+            url,
+            file_name,
+            parent_folder_id,
+            parent_folder_path,
+            on_duplicate
+      )
 }
 
 #' @export
-upload_assignment_file <- function(course_id, assignment_id, user_id,
-                                   file_name,
-                                   parent_folder_id = NULL,
-                                   parent_folder_path = "/",
-                                   on_duplicate = "overwrite") {
-
-  url <- make_canvas_url("courses", course_id, "assignments", assignment_id,
-                         "submissions", user_id, "files")
-  upload_file(url, file_name, parent_folder_id, parent_folder_path, on_duplicate)
-
+upload_assignment_file <- function(
+      course_id,
+      assignment_id,
+      user_id,
+      file_name,
+      parent_folder_id = NULL,
+      parent_folder_path = "/",
+      on_duplicate = "overwrite"
+) {
+      url <- make_canvas_url(
+            "courses",
+            course_id,
+            "assignments",
+            assignment_id,
+            "submissions",
+            user_id,
+            "files"
+      )
+      upload_file(
+            url,
+            file_name,
+            parent_folder_id,
+            parent_folder_path,
+            on_duplicate
+      )
 }
 
-upload_file <- function(url, file_name, parent_folder_id = NULL, parent_folder_path = "/", on_duplicate = "overwrite") {
-  if (!is.null(parent_folder_id) && !is.null(parent_folder_path)) stop("Do not specify both parent folder id and parent folder path.")
-  file_size <- file.info(file_name)$size
-  args <- sc(list(name = file_name,
-                  size = file_size,
-                  parent_folder_id = parent_folder_id,
-                  parent_folder_path = parent_folder_path,
-                  on_duplicate = on_duplicate))
-  upload_resp <- canvas_query(url, args, "POST")
-  upload_content <- httr::content(upload_resp)
-  upload_url <- upload_content$upload_url
-  upload_params <- upload_content$upload_params
-  upload_params <- append(upload_params,
-                          list(file = httr::upload_file(file_name)))
-  message(sprintf("File %s uploaded", file_name))
-  invisible(httr::POST(url = upload_url,
-                       body = upload_params))
+upload_file <- function(
+      url,
+      file_name,
+      parent_folder_id = NULL,
+      parent_folder_path = "/",
+      on_duplicate = "overwrite"
+) {
+      if (!is.null(parent_folder_id) && !is.null(parent_folder_path)) {
+            stop("Do not specify both parent folder id and parent folder path.")
+      }
+      file_size <- file.info(file_name)$size
+      args <- sc(list(
+            name = file_name,
+            size = file_size,
+            parent_folder_id = parent_folder_id,
+            parent_folder_path = parent_folder_path,
+            on_duplicate = on_duplicate
+      ))
+      upload_resp <- canvas_query(url, args, "POST")
+      upload_content <- httr::content(upload_resp)
+      upload_url <- upload_content$upload_url
+      upload_params <- upload_content$upload_params
+      upload_params <- append(
+            upload_params,
+            list(file = httr::upload_file(file_name))
+      )
+      message(sprintf("File %s uploaded", file_name))
+      invisible(httr::POST(url = upload_url, body = upload_params))
 }
 
 #' Create a course folder
@@ -73,12 +109,14 @@ upload_file <- function(url, file_name, parent_folder_id = NULL, parent_folder_p
 #' @examples
 #' create_course_folder(34232, name = "activities")
 create_course_folder <- function(course_id, name, parent_folder_id = NULL) {
-  url <- paste0(canvas_url(),
-                paste("courses", course_id, "folders", sep = "/"))
-  args <- sc(list(name = name,
-                  parent_folder_id = parent_folder_id))
-  invisible(canvas_query(url, args, "POST"))
-  message(sprintf("Folder %s created", name))
+      url <- paste0(
+            canvas_url(),
+            paste("courses", course_id, "folders", sep = "/")
+      )
+      args <- sc(list(name = name, parent_folder_id = parent_folder_id))
+      response = canvas_query(url, args, "POST")
+      message(sprintf("Folder %s created", name))
+      invisible(response)
 }
 
 #' Create a course assignment
@@ -120,46 +158,74 @@ create_course_folder <- function(course_id, name, parent_folder_id = NULL) {
 #' @examples
 #' create_course_assignment(course_id = 432432, name = "Challenging Assignment")
 #' create_course_assignment(course_id = 3432432, name = "R Packages, Review", peer_reviews = TRUE, points_possible = 100, omit_from_final_grade = TRUE)
-create_course_assignment <- function(course_id, name, position = NULL, submission_types = NULL, allowed_extensions = NULL, turnitin_enabled = NULL,
-                                    vericite_enabled = NULL, turnitin_settings = NULL, integration_data = NULL, integration_id = NULL, peer_reviews = NULL,
-                                    automatic_peer_reviews = NULL, notify_of_update = NULL, group_category_id = NULL, grade_group_students_individually = NULL,
-                                    external_tool_tag_attributes = NULL, points_possible = NULL, grading_type = NULL, due_at = NULL,
-                                    lock_at = NULL, unlock_at = NULL, description = NULL, assignment_group_id = NULL, muted = NULL,
-                                    assignment_overrides = NULL, only_visible_to_overrides = NULL, published = NULL, grading_standard_id = NULL,
-                                    omit_from_final_grade = NULL, quiz_lti = NULL) {
-  url <- make_canvas_url("courses", course_id, "assignments")
-  args <- sc(list(name = name,
-                  position = position,
-                  submission_types = submission_types,
-                  allowed_extensions = allowed_extensions,
-                  turnitin_enabled = turnitin_enabled,
-                  vericite_enabled = vericite_enabled,
-                  turnitin_settings = turnitin_settings,
-                  integration_data = integration_data,
-                  integration_id = integration_id,
-                  peer_reviews = peer_reviews,
-                  automatic_peer_reviews = automatic_peer_reviews,
-                  notify_of_update = notify_of_update,
-                  group_category_id = group_category_id,
-                  grade_group_students_individually = grade_group_students_individually,
-                  external_tool_tag_attributes = external_tool_tag_attributes,
-                  points_possible = points_possible,
-                  grading_type = grading_type,
-                  due_at = due_at,
-                  lock_at = lock_at,
-                  unlock_at = unlock_at,
-                  description = description,
-                  assignment_group_id = assignment_group_id,
-                  muted = muted,
-                  assignment_overrides = assignment_overrides,
-                  only_visible_to_overrides = only_visible_to_overrides,
-                  published = published,
-                  grading_standard_id = grading_standard_id,
-                  omit_from_final_grade = omit_from_final_grade,
-                  quiz_lti = quiz_lti))
-  names(args) <- sprintf("assignment[%s]", names(args))
-  invisible(canvas_query(url, args, "POST"))
-  message(sprintf("Assignment %s created.", name))
+create_course_assignment <- function(
+      course_id,
+      name,
+      position = NULL,
+      submission_types = NULL,
+      allowed_extensions = NULL,
+      turnitin_enabled = NULL,
+      vericite_enabled = NULL,
+      turnitin_settings = NULL,
+      integration_data = NULL,
+      integration_id = NULL,
+      peer_reviews = NULL,
+      automatic_peer_reviews = NULL,
+      notify_of_update = NULL,
+      group_category_id = NULL,
+      grade_group_students_individually = NULL,
+      external_tool_tag_attributes = NULL,
+      points_possible = NULL,
+      grading_type = NULL,
+      due_at = NULL,
+      lock_at = NULL,
+      unlock_at = NULL,
+      description = NULL,
+      assignment_group_id = NULL,
+      muted = NULL,
+      assignment_overrides = NULL,
+      only_visible_to_overrides = NULL,
+      published = NULL,
+      grading_standard_id = NULL,
+      omit_from_final_grade = NULL,
+      quiz_lti = NULL
+) {
+      url <- make_canvas_url("courses", course_id, "assignments")
+      args <- sc(list(
+            name = name,
+            position = position,
+            submission_types = submission_types,
+            allowed_extensions = allowed_extensions,
+            turnitin_enabled = turnitin_enabled,
+            vericite_enabled = vericite_enabled,
+            turnitin_settings = turnitin_settings,
+            integration_data = integration_data,
+            integration_id = integration_id,
+            peer_reviews = peer_reviews,
+            automatic_peer_reviews = automatic_peer_reviews,
+            notify_of_update = notify_of_update,
+            group_category_id = group_category_id,
+            grade_group_students_individually = grade_group_students_individually,
+            external_tool_tag_attributes = external_tool_tag_attributes,
+            points_possible = points_possible,
+            grading_type = grading_type,
+            due_at = due_at,
+            lock_at = lock_at,
+            unlock_at = unlock_at,
+            description = description,
+            assignment_group_id = assignment_group_id,
+            muted = muted,
+            assignment_overrides = assignment_overrides,
+            only_visible_to_overrides = only_visible_to_overrides,
+            published = published,
+            grading_standard_id = grading_standard_id,
+            omit_from_final_grade = omit_from_final_grade,
+            quiz_lti = quiz_lti
+      ))
+      names(args) <- sprintf("assignment[%s]", names(args))
+      response = canvas_query(url, args, 'POST')
+      message(sprintf("Assignment %s created.", name))
+      invisible(response)
 }
 
 #' Create a course quiz
@@ -191,60 +257,65 @@ create_course_assignment <- function(course_id, name, position = NULL, submissio
 #'
 #' @return Representation of the quiz object as a list
 #' @export
-create_course_quiz <- function(course_id, title,
-                               description = NULL,
-                               quiz_type = NULL,
-                               assignment_group_id = NULL,
-                               time_limit = NULL,
-                               shuffle_answers = NULL,
-                               hide_results = NULL,
-                               show_correct_answers = NULL,
-                               show_correct_answers_last_attempt = NULL,
-                               show_correct_answers_at = NULL,
-                               hide_correct_answers_at = NULL,
-                               allowed_attempts = NULL,
-                               scoring_policy = NULL,
-                               one_question_at_a_time = NULL,
-                               cant_go_back = NULL,
-                               access_code = NULL,
-                               ip_filter = NULL,
-                               due_at = NULL,
-                               lock_at = NULL,
-                               unlock_at = NULL,
-                               published = NULL,
-                               one_time_results = NULL,
-                               only_visible_to_overrides = NULL) {
-  url <- make_canvas_url("courses", course_id, "quizzes")
-  args <- sc(list(title = title,
-                  description = description,
-                  quiz_type = quiz_type,
-                  assignment_group_id = assignment_group_id,
-                  time_limit = time_limit,
-                  shuffle_answers = shuffle_answers,
-                  hide_results = hide_results,
-                  show_correct_answers = show_correct_answers,
-                  show_correct_answers_last_attempt = show_correct_answers_last_attempt,
-                  show_correct_answers_at = show_correct_answers_at,
-                  hide_correct_answers_at = hide_correct_answers_at,
-                  allowed_attempts = allowed_attempts,
-                  scoring_policy = scoring_policy,
-                  one_question_at_a_time = one_question_at_a_time,
-                  cant_go_back = cant_go_back,
-                  access_code = access_code,
-                  ip_filter = ip_filter,
-                  due_at = due_at,
-                  lock_at = lock_at,
-                  unlock_at = unlock_at,
-                  published = published,
-                  one_time_results = one_time_results,
-                  only_visible_to_overrides = only_visible_to_overrides))
-  names(args) <- sprintf("quiz[%s]", names(args))
-  response = canvas_query(url, args, "POST")
-  message(sprintf("Quiz %s created.", title))
-  quiz = response %>%
-    httr::content(as = 'text') %>%
-    jsonlite::fromJSON()
-  return(invisible(quiz))
+create_course_quiz <- function(
+      course_id,
+      title,
+      description = NULL,
+      quiz_type = NULL,
+      assignment_group_id = NULL,
+      time_limit = NULL,
+      shuffle_answers = NULL,
+      hide_results = NULL,
+      show_correct_answers = NULL,
+      show_correct_answers_last_attempt = NULL,
+      show_correct_answers_at = NULL,
+      hide_correct_answers_at = NULL,
+      allowed_attempts = NULL,
+      scoring_policy = NULL,
+      one_question_at_a_time = NULL,
+      cant_go_back = NULL,
+      access_code = NULL,
+      ip_filter = NULL,
+      due_at = NULL,
+      lock_at = NULL,
+      unlock_at = NULL,
+      published = NULL,
+      one_time_results = NULL,
+      only_visible_to_overrides = NULL
+) {
+      url <- make_canvas_url("courses", course_id, "quizzes")
+      args <- sc(list(
+            title = title,
+            description = description,
+            quiz_type = quiz_type,
+            assignment_group_id = assignment_group_id,
+            time_limit = time_limit,
+            shuffle_answers = shuffle_answers,
+            hide_results = hide_results,
+            show_correct_answers = show_correct_answers,
+            show_correct_answers_last_attempt = show_correct_answers_last_attempt,
+            show_correct_answers_at = show_correct_answers_at,
+            hide_correct_answers_at = hide_correct_answers_at,
+            allowed_attempts = allowed_attempts,
+            scoring_policy = scoring_policy,
+            one_question_at_a_time = one_question_at_a_time,
+            cant_go_back = cant_go_back,
+            access_code = access_code,
+            ip_filter = ip_filter,
+            due_at = due_at,
+            lock_at = lock_at,
+            unlock_at = unlock_at,
+            published = published,
+            one_time_results = one_time_results,
+            only_visible_to_overrides = only_visible_to_overrides
+      ))
+      names(args) <- sprintf("quiz[%s]", names(args))
+      response = canvas_query(url, args, "POST")
+      message(sprintf("Quiz %s created.", title))
+      quiz = response %>%
+            httr::content(as = 'text') %>%
+            jsonlite::fromJSON()
+      return(invisible(quiz))
 }
 
 #' Add a question to an existing quiz
@@ -264,38 +335,47 @@ create_course_quiz <- function(course_id, title,
 #' @param answers no description (Answer object)
 #' @export
 #' @return Dataframe representation of the question
-create_quiz_question = function (course_id, quiz_id,
-                                 question_name  = NULL,
-                                 question_text = NULL,
-                                 quiz_group_id  = NULL,
-                                 question_type = NULL,
-                                 position = NULL,
-                                 points_possible = NULL,
-                                 correct_comments = NULL,
-                                 incorrect_comments = NULL,
-                                 neutral_comments = NULL,
-                                 text_after_answers = NULL,
-                                 answers = NULL) {
-  url = make_canvas_url('courses', course_id,
-                        'quizzes', quiz_id,
-                        'questions')
-  args = sc(list(question_name = question_name,
-                 question_text = question_text,
-                 quiz_group_id  = quiz_group_id,
-                 question_type = question_type,
-                 position = position,
-                 points_possible = points_possible,
-                 correct_comments = correct_comments,
-                 incorrect_comments = incorrect_comments,
-                 neutral_comments = neutral_comments,
-                 text_after_answers = text_after_answers,
-                 answers = answers))
-  names(args) <- sprintf("question[%s]", names(args))
+create_quiz_question = function(
+      course_id,
+      quiz_id,
+      question_name = NULL,
+      question_text = NULL,
+      quiz_group_id = NULL,
+      question_type = NULL,
+      position = NULL,
+      points_possible = NULL,
+      correct_comments = NULL,
+      incorrect_comments = NULL,
+      neutral_comments = NULL,
+      text_after_answers = NULL,
+      answers = NULL
+) {
+      url = make_canvas_url(
+            'courses',
+            course_id,
+            'quizzes',
+            quiz_id,
+            'questions'
+      )
+      args = sc(list(
+            question_name = question_name,
+            question_text = question_text,
+            quiz_group_id = quiz_group_id,
+            question_type = question_type,
+            position = position,
+            points_possible = points_possible,
+            correct_comments = correct_comments,
+            incorrect_comments = incorrect_comments,
+            neutral_comments = neutral_comments,
+            text_after_answers = text_after_answers,
+            answers = answers
+      ))
+      names(args) <- sprintf("question[%s]", names(args))
 
-  response = canvas_query(url, args, "POST")
-  message(sprintf("Question %s created.", question_name))
-  question = response %>%
-    httr::content(as = 'text') %>%
-    jsonlite::fromJSON()
-  return(invisible(question))
+      response = canvas_query(url, args, "POST")
+      message(sprintf("Question %s created.", question_name))
+      question = response %>%
+            httr::content(as = 'text') %>%
+            jsonlite::fromJSON()
+      return(invisible(question))
 }
